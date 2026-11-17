@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Discador Rápido - DEIC</title>
+    
+    <!-- FONTES E ÍCONES -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --gold: #c5a059; 
+            --bg: #f4f7f6; 
+            --card: #ffffff; 
+            --text: #333; 
+            --border: #e0e0e0; 
+            --blue: #0056b3; 
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding-bottom: 40px; 
+            overflow-y: auto !important;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* CABEÇALHO COMPACTO MOBILE-FIRST COM LOGO */
+        .header-mobile {
+            background-color: #0b0c0e;
+            border-bottom: 2px solid var(--gold);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        .header-mobile .brand-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .header-mobile .brand-logo img {
+            height: 62px;
+            max-width: 82vw;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .btn-theme-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid #2b2f36;
+            color: var(--gold);
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-theme-toggle:active {
+            background: rgba(197, 160, 89, 0.2);
+        }
+
+        /* CAMPO DE BUSCA E FILTRO */
+        .search-container {
+            max-width: 900px;
+            margin: 16px auto 0;
+            padding: 0 14px;
+        }
+
+        .search-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .search-box {
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--gold);
+            box-shadow: 0 0 8px rgba(197, 160, 89, 0.25);
+        }
+
+        .search-box i {
+            color: #999;
+            margin-right: 12px;
+            font-size: 1.05rem;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            font-size: 1rem;
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        .filter-select {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 0.95rem;
+            color: var(--text);
+            font-family: inherit;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        .filter-select:focus {
+            border-color: var(--gold);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #666;
+            padding: 0 2px;
+        }
+
+        /* CONTAINER E TABELA */
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 12px 14px 20px; 
+        }
+
+        .table-wrapper {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background-color: #0b0c0e;
+            color: #f1c40f;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        th {
+            padding: 12px 14px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        td {
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.92rem;
+            vertical-align: middle;
+        }
+
+        /* LINHA DE CABEÇALHO DE DIVISÃO / DELEGACIA */
+        tr.group-header {
+            background-color: #1a2332 !important;
+            color: #ffffff;
+        }
+
+        tr.group-header td {
+            font-weight: 800;
+            font-size: 0.86rem;
+            letter-spacing: 0.5px;
+            padding: 9px 14px;
+            color: #f1c40f;
+            border-top: 2px solid var(--gold);
+            border-bottom: 1px solid #2a3a52;
+        }
+
+        .badge-unidade {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: rgba(0, 86, 179, 0.1);
+            color: var(--blue);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .setor-nome {
+            font-weight: 700;
+            font-size: 0.96rem;
+            color: var(--text);
+            display: block;
+            line-height: 1.3;
+        }
+
+        /* ITENS DE TELEFONE E BOTÃO DE LIGAR OTIMIZADOS PARA TOQUE */
+        .tel-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+        }
+
+        .tel-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .tel-row:first-child {
+            padding-top: 0;
+        }
+
+        body.dark-mode .tel-row {
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .tel-numero {
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+            font-size: 0.98rem;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        .tel-inativo {
+            color: #888;
+            text-decoration: line-through;
+        }
+
+        .btn-ligar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: #ffffff !important;
+            text-decoration: none !important;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid #218838;
+            box-shadow: 0 2px 5px rgba(40, 167, 69, 0.25);
+            transition: transform 0.12s ease, filter 0.15s ease;
+            white-space: nowrap;
+            min-height: 36px;
+        }
+
+        .btn-ligar:active {
+            transform: scale(0.96);
+            filter: brightness(1.1);
+        }
+
+        .badge-defeito {
+            display: inline-block;
+            background: #dc3545;
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .badge-desativado {
+            display: inline-block;
+            background: #6c757d;
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+            display: none;
+        }
+
+        /* RESPONSIVIDADE PARA TELAS MUITO ESTREITAS */
+        @media (max-width: 520px) {
+            th, td {
+                padding: 11px 10px;
+            }
+            .tel-row {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .tel-numero {
+                font-size: 0.94rem;
+            }
+            .btn-ligar {
+                padding: 7px 12px;
+                font-size: 0.82rem;
+            }
+        }
+
+        /* DARK MODE */
+        body.dark-mode { 
+            background: #121212; 
+            color: #eee; 
+            --card: #1e1e1e;
+            --border: #333;
+            --text: #eee;
+            --blue: #58a6ff;
+        }
+
+        body.dark-mode .search-box,
+        body.dark-mode .filter-select,
+        body.dark-mode .table-wrapper { 
+            background: #1e1e1e; 
+            border-color: #333; 
+        }
+
+        body.dark-mode .status-bar {
+            color: #aaa;
+        }
+
+        body.dark-mode .badge-unidade {
+            background: rgba(88, 166, 255, 0.15);
+            color: #58a6ff;
+        }
+    </style>
+</head>
+<body>
+
+<!-- CABEÇALHO LIMPO COM LOGO -->
+<header class="header-mobile">
+    <a href="index.html" class="brand-logo">
+        <img src="imagens/nav.png" alt="LOGO DEIC">
+    </a>
+    <button type="button" class="btn-theme-toggle" onclick="toggleTheme()" title="Alternar Tema">
+        <i id="theme-icon" class="fa fa-moon"></i>
+    </button>
+</header>
+
+<!-- CAMPO DE BUSCA -->
+<div class="search-container">
+    <div class="search-controls">
+        <div class="search-box">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Buscar Divisão, Delegacia, Setor ou Telefone..." onkeyup="filtrarContatos()">
+        </div>
+        <select id="unidadeFilter" class="filter-select" onchange="filtrarContatos()">
+            <option value="">Todas as Divisões / Delegacias</option>
+        </select>
+    </div>
+    <div class="status-bar">
+        <span id="contadorResultados">Carregando contatos...</span>
+        <span>Atualizado: 12/11/2026</span>
+    </div>
+</div>
+
+<!-- TABELA DE CONTATOS -->
+<div class="container">
+    <div class="table-wrapper">
+        <table id="tabelaContatos">
+            <thead>
+                <tr>
+                    <th style="width: 52%;">Setor</th>
+                    <th style="width: 48%;">Telefone / Discar</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state">
+            <i class="fa fa-phone-slash" style="font-size: 2rem; color: var(--gold); margin-bottom: 10px;"></i>
+            <p style="margin: 0; font-weight: 600;">Nenhum contato encontrado para o termo pesquisado.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // BASE DE DADOS EXTRAÍDA DA RELAÇÃO DE TELEFONES E RAMAIS - DEIC (12/11/2026)
+    const contatosDEIC = [
+        // DIRETORIA - DEIC
+        { unidade: "DEIC - DIRETORIA", setor: "DIRETOR", pessoa: "Dr. RONALDO AUGUSTO COMAR MARÃO SAYEG", telefones: ["2224-0805"], ramais: ["14805"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Divisionário Assistência", pessoa: "Dr. Milson Sergio Vasques Calves", telefones: ["2224-0806"], ramais: ["14806"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Assistente", pessoa: "Dra. Ana Paula Aparecida Garcia Rodrigues", telefones: ["2224-0347"], ramais: ["14347"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Secretárias", pessoa: "Lucia / Luana", telefones: ["2224-0805", "2221-7020"], ramais: ["14805", "Direto"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Chefe dos Investigadores", pessoa: "Fabiano Ezabel Pelá", telefones: ["2224-0811"], ramais: ["14811"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Chefe Cartório", pessoa: "Giovanna Zanchin Mingrone Pela", telefones: ["2224-0808"], ramais: ["14808"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Cartório", pessoa: "Luzia / Vani / Erika / Claudia", telefones: ["2224-0317"], ramais: ["14317"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Expediente Chefia dos Investigadores", pessoa: "Ranieri Rangel Faleiros / Marco Antonio Tressino (Treco)", telefones: ["2224-0797", "2221-0364"], ramais: ["14797", "Direto"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Motorista", pessoa: "Alessandro Vazone Lagonegro", telefones: ["2224-0709", "2221-0656"], ramais: ["14709", "Direto"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Setor Papiloscopia", pessoa: "Santiago / Fabricio / Roberto", telefones: ["2221-2925"], ramais: ["Direto"] },
+        { unidade: "DEIC - DIRETORIA", setor: "Plantão", pessoa: "Corpo de Segurança", telefones: ["2224-0333", "2221-0826"], ramais: ["14333", "Direto"] },
+
+        // UIP
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Del. UIP", pessoa: "Dr. Ivan Moyses Elian", telefones: ["2224-0802"], ramais: ["14802"] },
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Chefe", pessoa: "Luiz Roberto Laranjeira da Silva Junior", telefones: ["2221-2497"], ramais: ["Direto"] },
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Cartório", pessoa: "Priscila / Hugo / Marco / Fabio", telefones: ["2221-2534"], ramais: ["Direto"] },
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Reconhecimento Fotográfico / Retrato Falado", pessoa: "Tâmara / Floriano / Lilian", telefones: ["2224-0787"], ramais: ["14787"] },
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Laboratório de Análise de Crimes Cibernéticos", pessoa: "Marcos Tomihissa Tanaka / Dárcio Pestana Junior", telefones: ["2224-0319", "2221-4223"], ramais: ["14319", "Direto"] },
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Guardião", pessoa: "Wagner Silva de Souza / Glauco Janjacomo Pizani", telefones: ["2221-3358"], ramais: ["Direto"] },
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Sala de Meios", pessoa: "Ronaldo Martins Lopes / Leôncio Pimenta Bastos / Glauco de Andrade Costa", telefones: ["2224-0710", "2221-3211"], ramais: ["14710", "Direto"] },
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Plantão Sala de Meios", pessoa: "Sala de meios PABX", telefones: ["2224-0300"], ramais: ["14300"] },
+        { unidade: "UIP - Unidade de Inteligência Policial", setor: "Imprensa", pessoa: "Mauricio Rodrigues Peinado", telefones: ["2224-0727"], ramais: ["14727"] },
+
+        // DIVISÃO DE ADMINISTRAÇÃO
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Divisionário", pessoa: "Dr. David Pimentel Barbosa de Siena", telefones: ["2224-0804"], ramais: ["14804"] },
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Chefe Adm.", pessoa: "Marcio Rodrigues / Rogerio Olivio", telefones: ["2221-5685"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Licitação", pessoa: "Gildezio Ribeiro Rocha", telefones: ["2224-0752", "2221-7468", "2224-0831"], ramais: ["14752 (Defeito)", "Direto (Defeito)", "14831"] },
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Finanças", pessoa: "Silvio Jose Espezi / Márcio Antonio Espesi", telefones: ["2221-0347", "2221-1760", "2224-0303", "2224-0715"], ramais: ["Direto", "Direto", "14303", "14715"] },
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Almoxarifado / Materiais Núcleo Sub Frota", pessoa: "Célio Roberto da Silva", telefones: ["2221-3245"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Depto Pessoal", pessoa: "Jose Mauro D’Artibale Lopes", telefones: ["2224-0719", "2221-9017", "2221-1409"], ramais: ["14719", "Direto", "Direto"] },
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Material Bélico", pessoa: "Norimar Moreira (Flecha)", telefones: ["2221-3245"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Plantão Sub Frota", pessoa: "Ronaldo / Renato / Conrado", telefones: ["2224-0709"], ramais: ["14709"] },
+        { unidade: "DIVISÃO DE ADMINISTRAÇÃO", setor: "Protocolo", pessoa: "Vanderli / Rita / Neide / Oscar", telefones: ["2224-0374"], ramais: ["14374"] },
+
+        // DIVISÃO DISCCPAT
+        { unidade: "DIVISÃO DISCCPAT", setor: "Divisionário", pessoa: "Dr. Clemente Calvo Castilhone Junior", telefones: ["2224-0791", "2221-4677"], ramais: ["14791", "Direto"] },
+        { unidade: "DIVISÃO DISCCPAT", setor: "Secretária", pessoa: "Gislaine Cristina Bolzonello", telefones: ["2224-0739"], ramais: ["14739"] },
+        { unidade: "DIVISÃO DISCCPAT", setor: "Chefe Investipol", pessoa: "Alexandre Simone Silva", telefones: ["2221-2630"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO DISCCPAT", setor: "Chefe Escrivães", pessoa: "Maria Sueli Ferreira", telefones: ["2221-0331"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO DISCCPAT", setor: "Carceragem", pessoa: "Desativada", telefones: ["2224-0731"], ramais: ["14731"] },
+
+        // 1ª DISCCPAT
+        { unidade: "1ª DISCCPAT", setor: "Titular", pessoa: "Dr. Thiago de Souza Delgado", telefones: ["2221-1751"], ramais: ["Direto"] },
+        { unidade: "1ª DISCCPAT", setor: "Assistente", pessoa: "Dr. Daniel de Andrade Santos", telefones: [], ramais: [] },
+        { unidade: "1ª DISCCPAT", setor: "Chefe Invest.", pessoa: "Paulo Fernando Fortunato", telefones: [], ramais: [] },
+        { unidade: "1ª DISCCPAT", setor: "Chefe Escriv.", pessoa: "Fabio", telefones: ["2224-0767"], ramais: ["14767"] },
+
+        // 2ª DISCCPAT
+        { unidade: "2ª DISCCPAT", setor: "Titular", pessoa: "Dr. Fernando José Góes Santiago", telefones: [], ramais: [] },
+        { unidade: "2ª DISCCPAT", setor: "Assistente", pessoa: "Dr. Felipe Lopes Pereira", telefones: [], ramais: [] },
+        { unidade: "2ª DISCCPAT", setor: "Chefe Invest.", pessoa: "Anderson Antonio Martins Reche", telefones: ["2221-3907"], ramais: ["Direto"] },
+        { unidade: "2ª DISCCPAT", setor: "Chefe Escriv. / Cartório", pessoa: "Mario Monteiro de Godoy", telefones: ["2224-0774", "2221-3205"], ramais: ["14774", "Direto"] },
+
+        // 3ª DISCCPAT
+        { unidade: "3ª DISCCPAT", setor: "Titular", pessoa: "Dr. Rodolpho Chiarelli Junior", telefones: [], ramais: [] },
+        { unidade: "3ª DISCCPAT", setor: "Assistente", pessoa: "Dr. Luiz Roberto Pereira de Arruda", telefones: [], ramais: [] },
+        { unidade: "3ª DISCCPAT", setor: "Chefe Invest.", pessoa: "Moacir Teles Montilha", telefones: ["2224-0777"], ramais: ["14777"] },
+        { unidade: "3ª DISCCPAT", setor: "Chefe Escriv.", pessoa: "Carla Barbosa", telefones: ["2224-0778", "2221-2322"], ramais: ["14778", "Direto"] },
+
+        // 4ª DISCCPAT
+        { unidade: "4ª DISCCPAT", setor: "Titular", pessoa: "Dr. Fábio Sanches Sandrin", telefones: [], ramais: [] },
+        { unidade: "4ª DISCCPAT", setor: "Assistente", pessoa: "Dr. Braulio Cavarge Jesuino dos Santos", telefones: ["2221-9604"], ramais: ["Direto"] },
+        { unidade: "4ª DISCCPAT", setor: "Chefe Invest.", pessoa: "Marco Aurelio Bonaldo", telefones: [], ramais: [] },
+        { unidade: "4ª DISCCPAT", setor: "Chefe Escriv.", pessoa: "Ewerton Tarcísio Martinho dos Santos", telefones: ["2224-0781"], ramais: ["14781"] },
+
+        // 5ª DISCCPAT
+        { unidade: "5ª DISCCPAT", setor: "Titular", pessoa: "Dr. Pedro Ivo Correa Luiz Santos", telefones: ["2221-0348"], ramais: ["Direto"] },
+        { unidade: "5ª DISCCPAT", setor: "Assistente", pessoa: "Dr. Sandro Thadeu Carhel Pinto Vergal", telefones: ["2224-0784"], ramais: ["14784"] },
+        { unidade: "5ª DISCCPAT", setor: "Sala dos Investigadores", pessoa: "-", telefones: ["2224-0809"], ramais: ["14809"] },
+        { unidade: "5ª DISCCPAT", setor: "Chefe Invest.", pessoa: "Roldão Vieira / Marisa", telefones: ["2221-3232"], ramais: ["Direto"] },
+        { unidade: "5ª DISCCPAT", setor: "Chefe Escriv.", pessoa: "Leila Faria", telefones: ["2224-0783"], ramais: ["14783"] },
+
+        // 6ª DISCCPAT
+        { unidade: "6ª DISCCPAT", setor: "Titular", pessoa: "Dr. Renato Topan", telefones: [], ramais: [] },
+        { unidade: "6ª DISCCPAT", setor: "Assistente", pessoa: "Dr. Flavia Rocha Pinheiro", telefones: [], ramais: [] },
+        { unidade: "6ª DISCCPAT", setor: "Chefe Invest.", pessoa: "Rogério Brindo da Cruz", telefones: [], ramais: [] },
+        { unidade: "6ª DISCCPAT", setor: "Chefe Escrivães", pessoa: "Randolfo Ferreira de Carvalho", telefones: ["2221-4002"], ramais: ["Direto"] },
+
+        // DIVISÃO DIVECAR
+        { unidade: "DIVISÃO DIVECAR", setor: "Divisionário", pessoa: "Dr. Paul Henry Bozon Verduraz", telefones: [], ramais: [] },
+        { unidade: "DIVISÃO DIVECAR", setor: "Assistente", pessoa: "Dr. Rubens Nunes Paes / Dr. Diego Barbosa de Carvalho", telefones: [], ramais: [] },
+        { unidade: "DIVISÃO DIVECAR", setor: "Chefe Invest.", pessoa: "Luis Antonio Gonçalves Eto", telefones: [], ramais: [] },
+        { unidade: "DIVISÃO DIVECAR", setor: "Chefe Escriv.", pessoa: "Katia Goy Villar", telefones: ["2221-3616"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO DIVECAR", setor: "Secretaria", pessoa: "Maria Jose Nizoli Coelho", telefones: ["2224-0786", "2221-2521"], ramais: ["14786", "Direto"] },
+
+        // 1ª DIVECAR
+        { unidade: "1ª DIVECAR", setor: "Titular", pessoa: "Dra. Leslie Caram Petrus", telefones: [], ramais: [] },
+        { unidade: "1ª DIVECAR", setor: "Assistente", pessoa: "Dr. Alisson Thiago Thadeo Aznar Yokoi", telefones: [], ramais: [] },
+        { unidade: "1ª DIVECAR", setor: "Chefe Invest.", pessoa: "Denis Meni Almeida da Costa", telefones: [], ramais: [] },
+        { unidade: "1ª DIVECAR", setor: "Chefe Escr.", pessoa: "Luiz Alberto Rodrigues Lemos Mora", telefones: ["2221-1711"], ramais: ["Direto"] },
+        { unidade: "1ª DIVECAR", setor: "Cartório", pessoa: "-", telefones: ["2221-8837", "2224-0305"], ramais: ["Direto", "14305"] },
+
+        // 2ª DIVECAR
+        { unidade: "2ª DIVECAR", setor: "Titular", pessoa: "Dr. Danilo Alexiades", telefones: [], ramais: [] },
+        { unidade: "2ª DIVECAR", setor: "Assistente", pessoa: "Dr. Guilherme Caselli de Araujo", telefones: [], ramais: [] },
+        { unidade: "2ª DIVECAR", setor: "Chefe Invest.", pessoa: "Clayton Rodrigues Teixeira Lins", telefones: ["2221-0229"], ramais: ["Direto"] },
+        { unidade: "2ª DIVECAR", setor: "Chefe Escriv. / Cartório", pessoa: "Mariana Peixoto", telefones: ["2224-0754", "2221-1444"], ramais: ["14754", "Direto"] },
+
+        // 3ª DIVECAR
+        { unidade: "3ª DIVECAR", setor: "Titular", pessoa: "Dr. Arnaldo Rocha Junior", telefones: [], ramais: [] },
+        { unidade: "3ª DIVECAR", setor: "Assistente", pessoa: "Dra. Pamela Cristan Tabaja", telefones: [], ramais: [] },
+        { unidade: "3ª DIVECAR", setor: "Chefe Invest.", pessoa: "José Nilson Ferreira Junior", telefones: ["2224-0756"], ramais: ["14756"] },
+        { unidade: "3ª DIVECAR", setor: "Chefe Escriv. / Cartório", pessoa: "Roberta Nascimento da Silva", telefones: ["2221-3350"], ramais: ["Direto"] },
+
+        // 4ª DIVECAR
+        { unidade: "4ª DIVECAR", setor: "Titular", pessoa: "Dr. Andre Vinicius Alves Figueiredo", telefones: [], ramais: [] },
+        { unidade: "4ª DIVECAR", setor: "Assistente", pessoa: "Dr. Felipe Barreto Abreu", telefones: [], ramais: [] },
+        { unidade: "4ª DIVECAR", setor: "Chefe Invest.", pessoa: "Neimar Luís Saldanha de Carvalho", telefones: ["2224-0373"], ramais: ["14373"] },
+        { unidade: "4ª DIVECAR", setor: "Chefe Escr. Cartório", pessoa: "Aelton da Silva Barbosa", telefones: ["2221-5338"], ramais: ["Direto"] },
+        { unidade: "4ª DIVECAR", setor: "Sala dos Investigadores", pessoa: "Rosemeire Aparecida Basilio", telefones: ["2221-7011"], ramais: ["Direto"] },
+
+        // DIVISÃO DIG
+        { unidade: "DIVISÃO DIG", setor: "Divisionário", pessoa: "Dr. Ronaldo Tossunian", telefones: ["2224-0362"], ramais: ["14362"] },
+        { unidade: "DIVISÃO DIG", setor: "Assistente", pessoa: "-", telefones: ["2224-0325"], ramais: ["14325 (Desativado)"] },
+        { unidade: "DIVISÃO DIG", setor: "Secretárias", pessoa: "Sibele de Oliveira Pelegrini / Vania da Costa Pereira", telefones: ["2224-0349", "2221-3405"], ramais: ["14349", "Direto"] },
+        { unidade: "DIVISÃO DIG", setor: "Chefe Invest.", pessoa: "Marcus Casanova Nogueira", telefones: ["2224-0364"], ramais: ["14364 (Desativado)"] },
+        { unidade: "DIVISÃO DIG", setor: "Chefe Escriv.", pessoa: "Natércia V. Stamato", telefones: ["2224-0379"], ramais: ["14379"] },
+
+        // 1ª DIG (Pirataria)
+        { unidade: "1ª DIG (Pirataria)", setor: "Titular", pessoa: "Dr. Wagner Martins Carrasco de Oliveira", telefones: ["2221-3637"], ramais: ["Direto"] },
+        { unidade: "1ª DIG (Pirataria)", setor: "Assistente", pessoa: "Dra. Ana Lucia Lopes Miranda", telefones: [], ramais: [] },
+        { unidade: "1ª DIG (Pirataria)", setor: "Chefe Invest.", pessoa: "Wagner Derrico Pereira", telefones: [], ramais: [] },
+        { unidade: "1ª DIG (Pirataria)", setor: "Chefe Escriv.", pessoa: "Miguel Martorell Turano", telefones: ["2224-0740"], ramais: ["14740"] },
+
+        // 2ª DIG (Fé Pública)
+        { unidade: "2ª DIG (Fé Pública)", setor: "Titular", pessoa: "Dr. Fulvio Mecca", telefones: [], ramais: [] },
+        { unidade: "2ª DIG (Fé Pública)", setor: "Assistente", pessoa: "Dra. Lilian Bosniac Lamanna / Dr. Rogério Zuim Uehara", telefones: [], ramais: [] },
+        { unidade: "2ª DIG (Fé Pública)", setor: "Chefe Invest.", pessoa: "Luciano Lichy Grasso", telefones: ["2221-1267", "2224-0749"], ramais: ["Direto", "14749"] },
+        { unidade: "2ª DIG (Fé Pública)", setor: "Chefe Escriv.", pessoa: "João Carlos da Rocha Mansuido", telefones: ["2221-0631"], ramais: ["Direto"] },
+        { unidade: "2ª DIG (Fé Pública)", setor: "Cartório", pessoa: "Leandro / João / Luiz / Marcela", telefones: ["2221-0631"], ramais: ["Direto"] },
+
+        // 3ª DIG (Fraudes Financeiras e Econômicas)
+        { unidade: "3ª DIG (Fraudes Financeiras e Econômicas)", setor: "Titular", pessoa: "Dr. Fernando David de Melo Gonçalves", telefones: [], ramais: [] },
+        { unidade: "3ª DIG (Fraudes Financeiras e Econômicas)", setor: "Assistente", pessoa: "Dr. Felippe de Freitas Silva / Dr. Ricardo Kanashiri Syuffi Soares", telefones: [], ramais: [] },
+        { unidade: "3ª DIG (Fraudes Financeiras e Econômicas)", setor: "Chefe Invest. / Sala dos Invest.", pessoa: "Cristiano Rodrigues Montemor", telefones: ["2224-0388", "2221-1657"], ramais: ["14388", "Direto"] },
+        { unidade: "3ª DIG (Fraudes Financeiras e Econômicas)", setor: "Chefe Escriv. / Cartório", pessoa: "Mauricy Orlandini", telefones: ["2224-0741"], ramais: ["14741"] },
+
+        // DIVISÃO - DCCIBER
+        { unidade: "DIVISÃO - DCCIBER", setor: "Divisionário", pessoa: "Dr. Paulo Eduardo Pereira Barbosa", telefones: ["2221-0343"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO - DCCIBER", setor: "Assistente", pessoa: "Dr. Christian Nimoi", telefones: ["2221-0342"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO - DCCIBER", setor: "Chefe Invest.", pessoa: "Adriano Magalhães Borges", telefones: [], ramais: [] },
+        { unidade: "DIVISÃO - DCCIBER", setor: "Cartório Central", pessoa: "-", telefones: ["2221-0335"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO - DCCIBER", setor: "Chefe Escriv.", pessoa: "Rafael Soares", telefones: ["2221-0339"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO - DCCIBER", setor: "LAB-TAC", pessoa: "Laboratório Técnico de Análises Cibernéticas", telefones: ["2221-0109"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO - DCCIBER", setor: "Plantão", pessoa: "Sala de Meios", telefones: ["2221-7030"], ramais: ["Direto"] },
+        { unidade: "DIVISÃO - DCCIBER", setor: "Recepção", pessoa: "-", telefones: ["2221-0877"], ramais: ["Direto"] },
+
+        // 1ª DCCIBER
+        { unidade: "1ª DCCIBER", setor: "Titular", pessoa: "Dr. Thiago Cirino de Moura Chinellato", telefones: [], ramais: [] },
+        { unidade: "1ª DCCIBER", setor: "Assistente", pessoa: "Dr. Tarcio Lara Marcozo Severo", telefones: [], ramais: [] },
+        { unidade: "1ª DCCIBER", setor: "Chefe Invest.", pessoa: "Marcio Gonçalves de Oliveira", telefones: ["2221-1761"], ramais: ["Direto"] },
+        { unidade: "1ª DCCIBER", setor: "Chefe Escrivães", pessoa: "Leticia de Areia Menezes", telefones: [], ramais: [] },
+
+        // 2ª DCCIBER
+        { unidade: "2ª DCCIBER", setor: "Titular", pessoa: "Dr. Diego Castanheira Resende", telefones: [], ramais: [] },
+        { unidade: "2ª DCCIBER", setor: "Assistente", pessoa: "Dr. Maicon Richard de Moraes", telefones: [], ramais: [] },
+        { unidade: "2ª DCCIBER", setor: "Chefe Invest.", pessoa: "Bruno Souza Rechinho", telefones: ["2221-0977"], ramais: ["Direto"] },
+        { unidade: "2ª DCCIBER", setor: "Chefe Escriv.", pessoa: "Roberta Feiteiro Pinheiro", telefones: [], ramais: [] },
+
+        // 3ª DCCIBER
+        { unidade: "3ª DCCIBER", setor: "Titular", pessoa: "Dr. João Carlos Miguel Hueb", telefones: [], ramais: [] },
+        { unidade: "3ª DCCIBER", setor: "Assistente", pessoa: "Dr. Marcel Oliveira Madruga de Souza", telefones: [], ramais: [] },
+        { unidade: "3ª DCCIBER", setor: "Chefe Invest.", pessoa: "Flavio Kestel Sabino de Souza", telefones: [], ramais: [] },
+        { unidade: "3ª DCCIBER", setor: "Chefe Escriv.", pessoa: "Cristiano José dos Santos", telefones: ["2221-2282"], ramais: ["Direto"] },
+
+        // 4ª DCCIBER
+        { unidade: "4ª DCCIBER", setor: "Titular", pessoa: "Dr. Christian Nimoi", telefones: [], ramais: [] },
+        { unidade: "4ª DCCIBER", setor: "Assistente", pessoa: "Dr. Vitor Franchini Luna / Dr. Fernando Correa de Carvalho Mecucci", telefones: [], ramais: [] },
+        { unidade: "4ª DCCIBER", setor: "Chefe Invest.", pessoa: "Marcos Eduardo Julio de Oliveira", telefones: ["2221-0346"], ramais: ["Direto"] },
+        { unidade: "4ª DCCIBER", setor: "Chefe Escr.", pessoa: "Luiz Arthur Lima Souza", telefones: [], ramais: [] }
+    ];
+
+    // NORMALIZA TEXTO (REMOVE ACENTOS PARA BUSCA FLEXÍVEL)
+    function normalizar(str) {
+        return (str || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    // POPULA O SELECT DE DIVISÕES / DELEGACIAS
+    function popularFiltroUnidades() {
+        const select = document.getElementById("unidadeFilter");
+        const unidadesUnicas = [...new Set(contatosDEIC.map(item => item.unidade))];
+        unidadesUnicas.forEach(unidade => {
+            const option = document.createElement("option");
+            option.value = unidade;
+            option.textContent = unidade;
+            select.appendChild(option);
+        });
+    }
+
+    // FORMATA O NÚMERO PARA DISCAGEM NO CELULAR (EX: 2224-0805 -> tel:01122240805)
+    function gerarLinkDiscagem(telefone) {
+        const apenasDigitos = telefone.replace(/\D/g, "");
+        const numeroCompleto = apenasDigitos.length === 8 ? `011${apenasDigitos}` : apenasDigitos;
+        return `tel:${numeroCompleto}`;
+    }
+
+    // RENDERIZA A TABELA DE CONTATOS
+    function renderizarTabela(lista) {
+        const tbody = document.getElementById("corpoTabela");
+        const emptyState = document.getElementById("emptyState");
+        const contador = document.getElementById("contadorResultados");
+        tbody.innerHTML = "";
+
+        if (lista.length === 0) {
+            emptyState.style.display = "block";
+            contador.textContent = "0 registros";
+            return;
+        }
+
+        emptyState.style.display = "none";
+        contador.textContent = `${lista.length} de ${contatosDEIC.length} setores`;
+
+        let unidadeAtual = "";
+
+        lista.forEach(item => {
+            if (item.unidade !== unidadeAtual) {
+                unidadeAtual = item.unidade;
+                const trGrupo = document.createElement("tr");
+                trGrupo.className = "group-header";
+                trGrupo.innerHTML = `<td colspan="2"><i class="fa fa-building" style="margin-right: 7px;"></i>${unidadeAtual}</td>`;
+                tbody.appendChild(trGrupo);
+            }
+
+            const tr = document.createElement("tr");
+
+            const setorDesativado = item.pessoa === "Desativada";
+            const colSetor = `
+                <span class="badge-unidade">${item.unidade}</span>
+                <span class="setor-nome">
+                    ${item.setor}
+                    ${setorDesativado ? '<span class="badge-desativado" style="margin-left:5px;">Desativada</span>' : ''}
+                </span>
+            `;
+
+            let colTelefones = `<span style="color:#999; font-size:0.85rem;">Sem telefone</span>`;
+
+            if (item.telefones.length > 0) {
+                colTelefones = item.telefones.map((tel, idx) => {
+                    const infoRamal = (item.ramais && item.ramais[idx]) ? item.ramais[idx].toLowerCase() : "";
+                    const temDefeito = infoRamal.includes("defeito");
+                    const estaDesativado = infoRamal.includes("desativado") || setorDesativado;
+
+                    if (temDefeito) {
+                        return `
+                            <div class="tel-row">
+                                <span class="tel-numero tel-inativo">${tel}</span>
+                                <span class="badge-defeito">Defeito</span>
+                            </div>
+                        `;
+                    }
+
+                    if (estaDesativado) {
+                        return `
+                            <div class="tel-row">
+                                <span class="tel-numero tel-inativo">${tel}</span>
+                                <span class="badge-desativado">Desativado</span>
+                            </div>
+                        `;
+                    }
+
+                    const linkTel = gerarLinkDiscagem(tel);
+                    return `
+                        <div class="tel-row">
+                            <span class="tel-numero">${tel}</span>
+                            <a href="${linkTel}" class="btn-ligar" title="Ligar para ${item.setor}">
+                                <i class="fa fa-phone-alt"></i> Ligar
+                            </a>
+                        </div>
+                    `;
+                }).join("");
+            }
+
+            tr.innerHTML = `
+                <td>${colSetor}</td>
+                <td>${colTelefones}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // FILTRA EM TEMPO REAL
+    function filtrarContatos() {
+        const termoRaw = document.getElementById("searchInput").value.trim();
+        const termo = normalizar(termoRaw);
+        const termoNumerico = termoRaw.replace(/[\s\-\.]/g, "");
+        const unidadeSelecionada = document.getElementById("unidadeFilter").value;
+
+        const filtrados = contatosDEIC.filter(item => {
+            if (unidadeSelecionada && item.unidade !== unidadeSelecionada) {
+                return false;
+            }
+
+            if (!termo) return true;
+
+            const textoUnidade = normalizar(item.unidade);
+            const textoSetor = normalizar(item.setor);
+            const textoTelefones = item.telefones.join(" ").toLowerCase();
+            const textoTelefonesLimpo = item.telefones.map(t => t.replace(/[\s\-\.]/g, "")).join(" ");
+
+            return (
+                textoUnidade.includes(termo) ||
+                textoSetor.includes(termo) ||
+                textoTelefones.includes(termo) ||
+                (termoNumerico.length > 0 && textoTelefonesLimpo.includes(termoNumerico))
+            );
+        });
+
+        renderizarTabela(filtrados);
+    }
+
+    // CONTROLE DO TEMA (CLARO / ESCURO)
+    function toggleTheme(){
+        const b = document.body;
+        const i = document.getElementById("theme-icon");
+        b.classList.toggle("dark-mode");
+        const isDark = b.classList.contains("dark-mode");
+        localStorage.setItem("portalTheme", isDark ? "dark" : "light");
+        if(i) i.className = isDark ? "fa fa-sun" : "fa fa-moon";
+    }
+
+    (function(){
+        const s = localStorage.getItem("portalTheme");
+        if(s === "dark") {
+            document.body.classList.add("dark-mode");
+            const i = document.getElementById("theme-icon");
+            if(i) i.className = "fa fa-sun";
+        }
+        popularFiltroUnidades();
+        renderizarTabela(contatosDEIC);
+    })();
+</script>
+
+</body>
+</html>
